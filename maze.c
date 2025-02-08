@@ -65,12 +65,16 @@ void gerarLabirintoDFS(int x, int y) {
 void gerarLabirinto() {
   for (int y = 0; y < MAX_MAZE_ROWS; y++) {
     for (int x = 0; x < MAX_MAZE_COLUMNS; x++) {
-      maze_map[y][x] = '#';
+      if (y == 0 || y == MAX_MAZE_ROWS - 1 || x == 0 || x == MAX_MAZE_COLUMNS - 1) {
+        maze_map[y][x] = '#';
+      } else {
+        maze_map[y][x] = '#';
+      }
     }
   }
   gerarLabirintoDFS(1, 1);
   
-  maxTreasures = rand() % 5 + 2; // Gera entre 2 e 6 tesouros
+  maxTreasures = rand() % 5 + 2;
   int placedTreasures = 0;
   while (placedTreasures < maxTreasures) {
     int tx = rand() % (MAX_MAZE_COLUMNS - 2) + 1;
@@ -84,14 +88,14 @@ void gerarLabirinto() {
 
 void print_maze() {
   clear_console();
-  for (int r = 0; r < MAX_MAZE_ROWS; r++) {
-    for (int c = 0; c < MAX_MAZE_COLUMNS; c++) {
-      char ch = maze_map[r][c];
-      if(ch == '#') {
+  for (int y = 0; y < MAX_MAZE_ROWS; y++) {
+    for (int x = 0; x < MAX_MAZE_COLUMNS; x++) {
+      char ch = maze_map[y][x];
+      if (ch == '#') {
         printf("\033[31m%c\033[0m", ch);
-      } else if(ch == 'P') {
+      } else if (ch == 'P') {
         printf("\033[34m%c\033[0m", ch);
-      } else if(ch == 'T') {
+      } else if (ch == 'T') {
         printf("\033[33m%c\033[0m", ch);
       } else {
         printf("%c", ch);
@@ -116,15 +120,14 @@ void set_player() {
   int playerXPos, playerYPos;
   
   do {
-    playerYPos = rand() % MAX_MAZE_COLUMNS;
-    playerXPos = rand() % MAX_MAZE_ROWS;
-  } while (maze_map[playerXPos][playerYPos] != '.');
-
+    playerXPos = rand() % MAX_MAZE_COLUMNS;
+    playerYPos = rand() % MAX_MAZE_ROWS;
+  } while (maze_map[playerYPos][playerXPos] != '.');
   player_pos.x = playerXPos;
   player_pos.y = playerYPos;
   previous_player_pos.x = playerXPos;
   previous_player_pos.y = playerYPos;
-  maze_map[player_pos.x][player_pos.y] = 'P';
+  maze_map[player_pos.y][player_pos.x] = 'P';
 }
 
 char catch_inputs() {
@@ -143,7 +146,7 @@ char catch_inputs() {
 }
 
 int can_travel(int x, int y) {
-  return (maze_map[x][y] == '.' || maze_map[x][y] == 'T');
+  return (maze_map[y][x] == '.' || maze_map[y][x] == 'T');
 }
 
 void move_player(char key) {
@@ -151,29 +154,29 @@ void move_player(char key) {
   int newY = player_pos.y;
   
   switch (key) {
-    case 'a': newY = player_pos.y - 1; break;
-    case 'd': newY = player_pos.y + 1; break;
-    case 'w': newX = player_pos.x - 1; break;
-    case 's': newX = player_pos.x + 1; break;
+    case 'a': newX = player_pos.x - 1; break;
+    case 'd': newX = player_pos.x + 1; break;
+    case 'w': newY = player_pos.y - 1; break;
+    case 's': newY = player_pos.y + 1; break;
     default: return;
   }
   
-  if(newX < 0 || newX >= MAX_MAZE_ROWS || newY < 0 || newY >= MAX_MAZE_COLUMNS || !can_travel(newX, newY))
+  if (newX < 0 || newX >= MAX_MAZE_COLUMNS || newY < 0 || newY >= MAX_MAZE_ROWS || !can_travel(newX, newY))
     return;
   
-  if(maze_map[newX][newY] == 'T'){
+  if (maze_map[newY][newX] == 'T') {
     treasuresCollected++;
   }
   
-  maze_map[player_pos.x][player_pos.y] = '.';
+  maze_map[player_pos.y][player_pos.x] = '.';
   player_pos.x = newX;
   player_pos.y = newY;
-  maze_map[player_pos.x][player_pos.y] = 'P';
+  maze_map[player_pos.y][player_pos.x] = 'P';
   previous_player_pos = player_pos;
   
   print_maze();
   
-  if(treasuresCollected >= maxTreasures){
+  if (treasuresCollected >= maxTreasures) {
     gameIsRunning = 0;
     running = 0;
     sleep(1);
