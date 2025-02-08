@@ -25,7 +25,7 @@ int elapsed_time = 0;
 int running = 1;
 int gameIsRunning = 1;
 
-int maxTreasures = 2;
+int maxTreasures;
 int treasuresCollected = 0;
 
 void clear_console() {
@@ -69,8 +69,17 @@ void gerarLabirinto() {
     }
   }
   gerarLabirintoDFS(1, 1);
-  maze_map[1][1] = 'T';
-  maze_map[MAX_MAZE_ROWS - 2][MAX_MAZE_COLUMNS - 2] = 'T';
+  
+  maxTreasures = rand() % 5 + 2; // Gera entre 2 e 6 tesouros
+  int placedTreasures = 0;
+  while (placedTreasures < maxTreasures) {
+    int tx = rand() % (MAX_MAZE_COLUMNS - 2) + 1;
+    int ty = rand() % (MAX_MAZE_ROWS - 2) + 1;
+    if (maze_map[ty][tx] == '.') {
+      maze_map[ty][tx] = 'T';
+      placedTreasures++;
+    }
+  }
 }
 
 void print_maze() {
@@ -90,7 +99,7 @@ void print_maze() {
     }
     printf("\n");
   }
-  printf("\nTempo: %d segundos\n", elapsed_time);
+  printf("\nTempo: %d segundos | Tesouros: %d/%d\n", elapsed_time, treasuresCollected, maxTreasures);
 }
 
 void *update_timer(void *arg) {
@@ -146,12 +155,10 @@ void move_player(char key) {
     case 'd': newY = player_pos.y + 1; break;
     case 'w': newX = player_pos.x - 1; break;
     case 's': newX = player_pos.x + 1; break;
-    default: break;
+    default: return;
   }
   
-  if(newX < 0 || newX >= MAX_MAZE_ROWS || newY < 0 || newY >= MAX_MAZE_COLUMNS)
-    return;
-  if(!can_travel(newX, newY))
+  if(newX < 0 || newX >= MAX_MAZE_ROWS || newY < 0 || newY >= MAX_MAZE_COLUMNS || !can_travel(newX, newY))
     return;
   
   if(maze_map[newX][newY] == 'T'){
@@ -171,8 +178,7 @@ void move_player(char key) {
     running = 0;
     sleep(1);
     clear_console();
-    printf("\033[32m\n\n");
-    printf("########################################\n");
+    printf("\033[32m\n\n########################################\n");
     printf("#                                      #\n");
     printf("#             YOU WIN!                 #\n");
     printf("#                                      #\n");
@@ -183,9 +189,7 @@ void move_player(char key) {
 }
 
 int main() {
-  char key;
   srand(time(NULL));
-  
   gerarLabirinto();
   set_player();
   print_maze();
@@ -195,25 +199,7 @@ int main() {
   pthread_create(&timer_thread, NULL, update_timer, NULL);
 
   while (gameIsRunning) {
-    key = catch_inputs();
-    if (key == 'x') {
-      gameIsRunning = 0;
-      break;
-    }
-    move_player(key);
+    move_player(catch_inputs());
   }
-  
-  running = 0;
-  pthread_join(timer_thread, NULL);
-  
-  clear_console();
-  printf("\033[31m\n\n");
-  printf("########################################\n");
-  printf("#                                      #\n");
-  printf("#             YOU LOSE!                #\n");
-  printf("#                                      #\n");
-  printf("########################################\n\n");
-  printf("Tempo: %d segundos\n", elapsed_time);
-
   return 0;
 }
