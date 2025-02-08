@@ -86,7 +86,6 @@ void gerarLabirinto() {
   }
 }
 
-
 void print_maze() {
   clear_console();
   for (int y = 0; y < MAX_MAZE_ROWS; y++) {
