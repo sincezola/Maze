@@ -66,7 +66,7 @@ void gerarLabirinto() {
   for (int y = 0; y < MAX_MAZE_ROWS; y++) {
     for (int x = 0; x < MAX_MAZE_COLUMNS; x++) {
       if (y == 0 || y == MAX_MAZE_ROWS - 1 || x == 0 || x == MAX_MAZE_COLUMNS - 1) {
-        maze_map[y][x] = '#';  // Garante que as bordas sejam sempre paredes
+        maze_map[y][x] = '#';
       } else {
         maze_map[y][x] = '#';
       }
